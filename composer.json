@@ -1,0 +1,6 @@
+{
+    "require": {
+        "laravel/framework": "^5.4",
+        "rosette/api": " >=1.3"
+    }
+}
