@@ -18,10 +18,15 @@
               <div class="form-group">
                  <label for="chatfile">File input</label>
                  <input type="file" id="chatfile" name="chatfile" class="form-control-file" required aria-describedby="fileHelp">
-                 <small id="fileHelp" class="form-text text-muted">Upload the Txt file you got it from whatsapp.
+                 <small id="fileHelp" class="form-text text-muted">Upload the WhatsApp Chat Text File.
               </div>
+              @if(count($errors))
+             @foreach($errors as $error)
+             <div class="alert alert-danger" role="alert">{{$error}}</div>
+            @endforeach
+            @endif
                 <button type="submit" class="btn btn-primary btn-lg">Submit</button>
-            </form>
+            </form>            
        </div>            
     </div>
 </div>

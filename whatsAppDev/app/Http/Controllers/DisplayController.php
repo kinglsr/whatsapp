@@ -7,6 +7,8 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use App\Pathfile;
+use App\Http\Controllers\HomeController;
+
 
 class DisplayController extends Controller
 {
@@ -26,17 +28,40 @@ class DisplayController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function index()
-    {
-        return view('display');
+    { 
+      $path = $this->getPath();
+      $obj = new HomeController;
+      $frontEndValues = $obj->getDetails($path);
+      return view('/display' , compact('frontEndValues'));
     }
+
+
+    /**
+     *
+     *
+     * @return string
+     */
+
+    public function getPath()
+    {
+
+      $query = 'select filepath from pathfiles where user_id = '.\Auth::user()->id. ' order by created_at desc LIMIT 1';
+      $filename = \DB::select($query);
+      return $filename[0]->filepath;
+    }
+    
+
 
     //Get content from file
 
     public function getContent(Request $request) 
     {
-       $input = $request->all();
-        
-        $fromArray = explode('-', $input['fromDate']); 
+       $input = $request->all(); 
+      //[personName] => Viswa HCM [fromDate] => 2014-06-04 [toDate] => 2017-07-11 )
+
+
+
+        $fromArray = explode('-', $input['fromDate']);
          
         $fromyear = str_split($fromArray[0] , 2);
          
@@ -50,24 +75,13 @@ class DisplayController extends Controller
 
         $from = $newfrom;    //  whatsapp  mon/date/year  6/14/16
         $to = $newto;
-
-        if($input['personName']){
-          $per = $input['personName'];
-          $both = false;
-        } elseif ($input['both']) {
-          $both = true;
-          $per = false;
-        }else{
-            return \Response::json(array('error' => 'Select atleast one person or both'));
-        }
         
-        $query = 'select filepath from pathfiles where user_id = '.\Auth::user()->id. ' order by created_at desc LIMIT 1';
-         $filename = \DB::select($query); 
+        $filePath = $this->getPath();
 
         try
         {
            
-          $fileName = storage_path('app/').$filename[0]->filepath;
+          $fileName = storage_path('app/').$filePath;
 
           $file = fopen($fileName , 'r');
           
@@ -87,34 +101,34 @@ class DisplayController extends Controller
 
             $j = 0;
 
-            foreach ($array as $key => $value) { 
+            foreach ($array as $key => $value) {
+
                     if(strtotime($array[$key][0]) >= strtotime($from) &&  strtotime($array[$key][0]) <= strtotime($to)) {
-                        if($per){
+                        if(!stripos($input['personName'], 'both')){
+                          $per = $input['personName'];
                            if(stripos($array[$key][1] , $per)) {
                              $textToDisplay[$j] = $array[$key];
                               $no_date = explode(':' ,$array[$key][1]);
                               $selected_array[$j] = preg_replace('/[^a-z]/i', ' ', end($no_date));
                               $j++;
                            }    
-                        } elseif ($both) {
+                        } else {
                             $textToDisplay[$j] = $array[$key];
                             $no_date = explode(':' ,$array[$key][1]);
                             $selected_array[$j] = preg_replace('/[^a-z]/i', ' ', end($no_date));
                             $j++;               
-                        }else {
-                          echo "Select atleast one person";
-                        } 
+                        }
                     }       
                 }
 
             $final_txt = '';
             foreach ($selected_array as $key => $value) {
-                    $final_txt  .=  $selected_array[$key] . " ";
+              $final_txt  .=  $selected_array[$key] . " ";
             }
             
             fclose($file);
             if(count($textToDisplay) == 0){
-              return \Response::json(array('error' => 'No data found for selected Dates try again'));
+              return back()->withInput();
             }
             return view('/texts' , compact('textToDisplay'));
         }

@@ -16,23 +16,30 @@
              <form action="/display/getContent" method="POST" >
              {{ csrf_field() }}
               <div class="form-group">
-                <label for="personName">Enter A Person Name</label>
-                <input type="text" class="form-control" id="personName" name="personName" >
-              </div>
-              OR
-             <div class="form-group">
-                <label for="both">Check the Box to select both texts</label>
-                <input type="checkbox" class="form-control" id="both" name="both" >
-              </div>
+                <label for="personName">Select list:</label>
+                <select class="form-control" id="personName" name="personName" required>
+                    <option value="{{$frontEndValues[0]}}">{{$frontEndValues[0]}}</option>
+                    <option value="{{$frontEndValues[1]}}">{{$frontEndValues[1]}}</option>
+                    <option value="both">Both</option>
+                </select>
+              </div>              
               <div class="form-group">
                 <label for="fromDate">From Date</label>
                 <input class="form-control" type="date" name="fromDate" id="fromDate" required>
-              </div> 
-
+              </div>
+              @if(count($frontEndValues))
+                 <div class="alert alert-success" role="alert">Select Date Between {{$frontEndValues[2]}} and {{$frontEndValues[3]}}
+                 </div>            
+               @endif
               <div class="form-group">
                 <label for="toDate">From Date</label>
                 <input class="form-control" type="date" name="toDate" id="toDate" required>
-              </div> TO DATE SHOULD BE GREATER THAN FROM DATE       
+              </div>
+              @if($frontEndValues)
+                 <div class="alert alert-success" role="alert">Select Date Between {{$frontEndValues[2]}} and {{@$frontEndValues[2]}}
+                 TO DATE SHOULD BE GREATER THAN FROM DATE
+                 </div>            
+               @endif      
               
               <div class="form-group">
               <button type="submit" class="btn btn-primary">Get the Content</button>
