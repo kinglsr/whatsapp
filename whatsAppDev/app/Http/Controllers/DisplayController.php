@@ -59,8 +59,6 @@ class DisplayController extends Controller
        $input = $request->all(); 
       //[personName] => Viswa HCM [fromDate] => 2014-06-04 [toDate] => 2017-07-11 )
 
-
-
         $fromArray = explode('-', $input['fromDate']);
          
         $fromyear = str_split($fromArray[0] , 2);
@@ -104,12 +102,12 @@ class DisplayController extends Controller
             foreach ($array as $key => $value) {
 
                     if(strtotime($array[$key][0]) >= strtotime($from) &&  strtotime($array[$key][0]) <= strtotime($to)) {
-                        if(!stripos($input['personName'], 'both')){
+                        if($input['personName'] !== 'both'){
                           $per = $input['personName'];
                            if(stripos($array[$key][1] , $per)) {
                              $textToDisplay[$j] = $array[$key];
                               $no_date = explode(':' ,$array[$key][1]);
-                              $selected_array[$j] = preg_replace('/[^a-z]/i', ' ', end($no_date));
+                              $selected_array[$j] = preg_replace('/[^a-z]/i', ' ', end($no_date)).".";
                               $j++;
                            }    
                         } else {
@@ -118,14 +116,17 @@ class DisplayController extends Controller
                             $selected_array[$j] = preg_replace('/[^a-z]/i', ' ', end($no_date));
                             $j++;               
                         }
-                    }       
+                    }
                 }
 
             $final_txt = '';
             foreach ($selected_array as $key => $value) {
-              $final_txt  .=  $selected_array[$key] . " ";
+              $final_txt  .=  $selected_array[$key]."<br />";
             }
-            
+            if($final_txt !== '')
+            {
+              Storage::put('finaltext/'.\Auth::user()->id.'.txt', $final_txt);
+            }            
             fclose($file);
             if(count($textToDisplay) == 0){
               return back()->withInput();
@@ -136,5 +137,34 @@ class DisplayController extends Controller
         {
           return die("The file doesn't exist");
         }
+    }
+
+    public function getAnalysis()
+    {
+      try {
+        $fileName = storage_path('app/finaltext/'.\Auth::user()->id.'.txt');
+        $textToSend = file_get_contents($fileName);
+
+        // $ curl -d "text=great" http://text-processing.com/api/sentiment/
+        
+        $url = 'http://text-processing.com/api/sentiment/';
+
+        $ch = curl_init();
+        curl_setopt($ch,CURLOPT_URL, $url);
+        curl_setopt($ch,CURLOPT_POSTFIELDS, 'text='.$textToSend);
+       //execute post
+        if(curl_exec($ch))
+          {
+            $result = json_decode(curl_exec($ch));
+            return view('\graph' , compact('$result'));
+          }
+        curl_close($ch);
+
+        //return $result;        
+      } catch (Illuminate\Filesystem\FileNotFoundException $e) {
+
+        return back()->withInput();        
+      }
+      
     }
 }

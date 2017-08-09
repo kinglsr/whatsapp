@@ -2,7 +2,7 @@
 
 
 @section('content')
- <div class="container">
+ <div class="container" id="app">
     <div class="row">
         <div class="col-md-8 col-md-offset-2">
             <div class="panel panel-default">
@@ -28,7 +28,7 @@
                 <input class="form-control" type="date" name="fromDate" id="fromDate" required>
               </div>
               @if(count($frontEndValues))
-                 <div class="alert alert-success" role="alert">FROM DATE SHOULD BE LESS THAN To DATE Select Date Between {{$frontEndValues[2]}} and {{$frontEndValues[3]}}
+                 <div class="alert alert-success" role="alert">Select Date Between {{$frontEndValues[2]}} and {{$frontEndValues[3]}}
                  </div>            
                @endif
               <div class="form-group">
@@ -36,8 +36,8 @@
                 <input class="form-control" type="date" name="toDate" id="toDate" required>
               </div>
               @if($frontEndValues)
-                 <div class="alert alert-success" role="alert">TO DATE SHOULD BE GREATER THAN FROM DATE
-                 Select Date Between {{$frontEndValues[2]}} and {{@$frontEndValues[2]}}               
+                 <div class="alert alert-success" role="alert">Select Date Between {{$frontEndValues[2]}} and {{@$frontEndValues[2]}}
+                 TO DATE SHOULD BE GREATER THAN FROM DATE
                  </div>            
                @endif      
               
