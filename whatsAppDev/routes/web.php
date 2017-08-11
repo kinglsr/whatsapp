@@ -26,9 +26,3 @@ Route::get('/display', 'DisplayController@index')->name('display');
 Route::post('/display/getContent', 'DisplayController@getContent');
 
 Route::get('/display/getAnalysis' , 'DisplayController@getAnalysis');
-
-
-
-Route::get('/vue', function () {
-    return view('vue');
-});

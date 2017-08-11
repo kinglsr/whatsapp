@@ -145,6 +145,7 @@ class DisplayController extends Controller
         $fileName = storage_path('app/finaltext/'.\Auth::user()->id.'.txt');
         $textToSend = file_get_contents($fileName);
 
+
         // $ curl -d "text=great" http://text-processing.com/api/sentiment/
         
         $url = 'http://text-processing.com/api/sentiment/';
@@ -152,13 +153,21 @@ class DisplayController extends Controller
         $ch = curl_init();
         curl_setopt($ch,CURLOPT_URL, $url);
         curl_setopt($ch,CURLOPT_POSTFIELDS, 'text='.$textToSend);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
        //execute post
         if(curl_exec($ch))
           {
-            $result = json_decode(curl_exec($ch));
-            return view('\graph' , compact('$result'));
+            $json = (curl_exec($ch));
+            $results = json_decode($json, true);       
+            $probability = $results['probability'];
+            $label = $results['label'];
+            return view('\graph' , compact('label' , 'probability'));
           }
+        else {
+          return ('No server Response');
+        }
         curl_close($ch);
+        
 
         //return $result;        
       } catch (Illuminate\Filesystem\FileNotFoundException $e) {
